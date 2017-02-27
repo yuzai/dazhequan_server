@@ -5,7 +5,7 @@ var mongoose = require('mongoose');
 var sha1 = require('sha1');
 var jwt = require('./models/jwt_auth');
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost/user');
+mongoose.connect('mongodb://xiaobo:xiaoboma@ds163699.mlab.com:63699/dazhequan');
 
 function register(req,res){
   var post='';
