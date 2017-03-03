@@ -4,9 +4,11 @@ var info = require('./models/info');
 var mongoose = require('mongoose');
 var sha1 = require('sha1');
 var jwt = require('./models/jwt_auth');
+var moment = require('moment');
+moment.locale('zh-cn');
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://xiaobo:xiaoboma@ds163699.mlab.com:63699/dazhequan');
-
+// mongoose.connect('mongodb://localhost:27017/user')
 function register(req,res){
   var post='';
   req.on('data', function (chunk) {
@@ -117,6 +119,9 @@ function homepage(req,res){
       if(err){
         console.log(err);
       }else{
+        doc.forEach(function(item){
+          item.time = moment(item.time).fromNow();
+        })
         news = JSON.stringify(doc);
         res.write(news);
         res.end();
@@ -139,8 +144,9 @@ function post(req,res){
       if(result!='error'){
         var myinfo = new info({
           username:result.iss,
+          title:post.title,
           info: post.info,
-          time: post.time
+          time: moment().format()
         });
         myinfo.save(function(err,data){
                 if(err){
