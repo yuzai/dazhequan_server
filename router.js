@@ -121,6 +121,7 @@ function homepage(req,res){
       }else{
         doc.forEach(function(item){
           item.time = moment(item.time).fromNow();
+          item.content = null;
         })
         news = JSON.stringify(doc);
         res.write(news);
@@ -145,7 +146,7 @@ function post(req,res){
         var myinfo = new info({
           username:result.iss,
           title:post.title,
-          info: post.info,
+          content: post.info,
           time: moment().format()
         });
         myinfo.save(function(err,data){
@@ -166,7 +167,27 @@ function post(req,res){
     }
   })
 }
-
+function paper(req,res){
+  var post='';
+  req.on('data', function (chunk) {
+    post += chunk;
+  });
+  req.on('end', function () {
+    post = JSON.parse(post);
+    res.writeHead(200, {'Content-Type': 'text/html',"Access-Control-Allow-Origin":"*"});
+    var news = '';
+    console.log(post);
+    info.findOne({'_id':post._id},function(err,doc){
+      if(err){
+        console.log(err);
+      }else{
+        news = JSON.stringify(doc);
+        res.write(news);
+        res.end();
+      }
+    });
+  })
+}
 module.exports = function(req,res){
   var pathname = url.parse(req.url).pathname;
   console.log(pathname);
@@ -176,6 +197,7 @@ module.exports = function(req,res){
     case '/logout':logout(req,res);break;
     case '/':homepage(req,res);break;
     case '/post':post(req,res);break;
+    case '/paper':paper(req,res);break;
     default: moren();break;
   }
 }
