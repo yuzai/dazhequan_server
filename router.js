@@ -181,8 +181,44 @@ function paper(req,res){
       if(err){
         console.log(err);
       }else{
+        doc.time = moment(doc.time).fromNow();
         news = JSON.stringify(doc);
         res.write(news);
+        res.end();
+      }
+    });
+  })
+}
+
+function like(req,res){
+  var post='';
+  req.on('data', function (chunk) {
+    post += chunk;
+  });
+  req.on('end', function () {
+    post = JSON.parse(post);
+    res.writeHead(200, {'Content-Type': 'text/html',"Access-Control-Allow-Origin":"*"});
+    var news = '';
+    console.log(post);
+    info.findOne({'_id':post._id},function(err,doc){
+      if(err){
+        console.log(err);
+      }else{
+        if(doc.like.length>0){
+          var _like = doc.like.filter(function(item){
+            return item !== post.username;
+          });
+          console.log(_like);
+          if(_like.length < doc.like.length){
+            doc.like = _like;
+          }else {
+            doc.like.push(post.username);
+          }
+        }else{
+          doc.like.push(post.username);
+        }
+        doc.save();
+        res.write('yes');
         res.end();
       }
     });
@@ -198,6 +234,7 @@ module.exports = function(req,res){
     case '/':homepage(req,res);break;
     case '/post':post(req,res);break;
     case '/paper':paper(req,res);break;
+    case '/like':like(req,res);break;
     default: moren();break;
   }
 }
