@@ -4,7 +4,8 @@ var infoSchema = mongoose.Schema({
   title: String,
   content: String,
   like:Array,
-  time:String
+  time:String,
+  imgsrc:Array
 });
 var info = mongoose.model('info',infoSchema);
 module.exports = info;

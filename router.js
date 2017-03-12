@@ -1,3 +1,6 @@
+var fs = require('fs');
+var path=require('path');
+var uuid = require('node-uuid');
 var url = require('url');
 var user = require('./models/user');
 var info = require('./models/info');
@@ -5,6 +8,28 @@ var mongoose = require('mongoose');
 var sha1 = require('sha1');
 var jwt = require('./models/jwt_auth');
 var moment = require('moment');
+
+var MIME_TYPE = {
+    "css": "text/css",
+    "gif": "image/gif",
+    "html": "text/html",
+    "ico": "image/x-icon",
+    "jpeg": "image/jpeg",
+    "jpg": "image/jpeg",
+    "js": "text/javascript",
+    "json": "application/json",
+    "pdf": "application/pdf",
+    "png": "image/png",
+    "svg": "image/svg+xml",
+    "swf": "application/x-shockwave-flash",
+    "tiff": "image/tiff",
+    "txt": "text/plain",
+    "wav": "audio/x-wav",
+    "wma": "audio/x-ms-wma",
+    "wmv": "video/x-ms-wmv",
+    "xml": "text/xml"
+};
+
 moment.locale('zh-cn');
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://xiaobo:xiaoboma@ds163699.mlab.com:63699/dazhequan');
@@ -143,22 +168,45 @@ function post(req,res){
     if(post.token){
       var result = jwt.decode(post.token);
       if(result!='error'){
+        res.writeHead(200, {'Content-Type': 'text/html',"Access-Control-Allow-Origin":"*"});
+        res.write('yes');
+        res.end();
         var myinfo = new info({
           username:result.iss,
           title:post.title,
           content: post.info,
-          time: moment().format()
+          time: moment().format(),
+          imgsrc:[]
         });
-        myinfo.save(function(err,data){
+        if(post.img_data.length>0){
+            var funcs = post.img_data.map(function(item){
+              return new Promise(function(resolve,reject){
+                item = item.replace(/^data:image\/\w+;base64,/, "");
+                var dataBuffer = new Buffer(item, 'base64');
+                var name = uuid.v1();
+                fs.writeFile("upload/"+name+'.jpg', dataBuffer, function(err) {
+                    if(err){
+                      reject(err);
+                      console.log(err);
+                    }else{
+                      resolve(name+'.jpg');
+                    }
+                });
+              })
+            })
+            Promise.all(funcs).then(function(value){
+              myinfo.imgsrc = value;
+              myinfo.save(function(err,data){
                 if(err){
                   console.log(err);
                 }else {
                   console.log('ok');
                 }
               })
-        res.writeHead(200, {'Content-Type': 'text/html',"Access-Control-Allow-Origin":"*"});
-        res.write('yes');
-        res.end();
+            }).catch(function(value){
+              console.log(value);
+            })
+        }
       }
     }else {
       res.writeHead(200, {'Content-Type': 'text/html',"Access-Control-Allow-Origin":"*"});
@@ -224,6 +272,37 @@ function like(req,res){
     });
   })
 }
+
+
+function static(req,res){
+    var filePath='./';
+    console.log(req.url);
+    if(/^\/upload/.test(req.url)){
+      console.log(1);
+      filePath = "./" + url.parse(req.url).pathname;
+    }
+
+    fs.exists(filePath,function(err){
+        if(!err){
+            res.writeHead(200,{'content-type':'text/html'});
+            res.end("sorry,404");
+        }else{
+            var ext = path.extname(filePath);
+            ext = ext?ext.slice(1) : 'unknown';
+            var contentType = MIME_TYPE[ext] || "text/plain";
+            fs.readFile(filePath,function(err,data){
+                if(err){
+                    res.end("<h1>500</h1>服务器内部错误！");
+                }else{
+                    res.writeHead(200,{'content-type':contentType});
+                    console.log(contentType);
+                    res.end(data);
+                }
+            });//fs.readfile
+        }
+    })//path.exists
+
+}
 module.exports = function(req,res){
   var pathname = url.parse(req.url).pathname;
   console.log(pathname);
@@ -235,6 +314,6 @@ module.exports = function(req,res){
     case '/post':post(req,res);break;
     case '/paper':paper(req,res);break;
     case '/like':like(req,res);break;
-    default: moren();break;
+    default: static(req,res);break;
   }
 }
