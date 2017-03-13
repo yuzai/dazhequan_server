@@ -294,7 +294,7 @@ function static(req,res){
     fs.exists(filePath,function(err){
         if(!err){
             res.writeHead(200,{'content-type':'text/html'});
-            res.end("sorry,404");
+            res.end("sorry,404"+err);
         }else{
             var ext = path.extname(filePath);
             ext = ext?ext.slice(1) : 'unknown';
