@@ -184,7 +184,7 @@ function post(req,res){
                 item = item.replace(/^data:image\/\w+;base64,/, "");
                 var dataBuffer = new Buffer(item, 'base64');
                 var name = uuid.v1();
-                fs.writeFile("upload/"+name+'.jpg', dataBuffer, function(err) {
+                fs.writeFile("./upload/"+name+'.jpg', dataBuffer, function(err) {
                     if(err){
                       reject(err);
                       console.log(err);
@@ -206,6 +206,15 @@ function post(req,res){
             }).catch(function(value){
               console.log(value);
             })
+        }else
+        {
+          myinfo.save(function(err,data){
+          if(err){
+            console.log(err);
+          }else {
+            console.log('ok');
+          }
+        })
         }
       }
     }else {
