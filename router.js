@@ -184,7 +184,7 @@ function post(req,res){
                 item = item.replace(/^data:image\/\w+;base64,/, "");
                 var dataBuffer = new Buffer(item, 'base64');
                 var name = uuid.v1();
-                fs.writeFile(path.resolve(__dirname,"/upload/"+name+'.jpg'), dataBuffer, function(err) {
+                fs.writeFile("https://dazhequan.herokuapp.com/upload/"+name+'.jpg', dataBuffer, function(err) {
                     if(err){
                       reject(err);
                       console.log(err);
