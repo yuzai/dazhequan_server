@@ -178,7 +178,7 @@ function post(req,res){
           time: moment().format(),
           imgsrc:[]
         });
-        if(post.img_data.length>0){
+        if(post.img_data && post.img_data.length>0){
             var funcs = post.img_data.map(function(item){
               return new Promise(function(resolve,reject){
                 item = item.replace(/^data:image\/\w+;base64,/, "");
