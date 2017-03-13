@@ -32,8 +32,8 @@ var MIME_TYPE = {
 
 moment.locale('zh-cn');
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://xiaobo:xiaoboma@ds163699.mlab.com:63699/dazhequan');
-// mongoose.connect('mongodb://localhost:27017/user')
+// mongoose.connect('mongodb://xiaobo:xiaoboma@ds163699.mlab.com:63699/dazhequan');
+mongoose.connect('mongodb://localhost:27017/user')
 function register(req,res){
   var post='';
   req.on('data', function (chunk) {
@@ -184,7 +184,7 @@ function post(req,res){
                 item = item.replace(/^data:image\/\w+;base64,/, "");
                 var dataBuffer = new Buffer(item, 'base64');
                 var name = uuid.v1();
-                fs.writeFile("https://dazhequan.herokuapp.com/upload/"+name+'.jpg', dataBuffer, function(err) {
+                fs.writeFile("./upload/"+name+'.jpg', dataBuffer, function(err) {
                     if(err){
                       reject(err);
                       console.log(err);
