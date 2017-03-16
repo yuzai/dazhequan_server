@@ -8,6 +8,7 @@ var mongoose = require('mongoose');
 var sha1 = require('sha1');
 var jwt = require('./models/jwt_auth');
 var moment = require('moment');
+var upload = require('./upload');//upload file
 
 var MIME_TYPE = {
     "css": "text/css",
@@ -189,6 +190,7 @@ function post(req,res){
                       reject(err);
                       console.log(err);
                     }else{
+                      upload(name+'.jpg',"./upload/"+name+'.jpg');
                       resolve(name+'.jpg');
                     }
                 });
