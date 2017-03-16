@@ -5,7 +5,7 @@ qiniu.conf.SECRET_KEY = '9UJtJtOG8NBW5EBmWi3LdWWy3tYMf-nC9QclRuR9';
 
 function myupload(name,filepath){
     //要上传的空间
-    bucket = 'uploadtest';
+    bucket = 'upload';
     //上传到七牛后保存的文件名
     key = name;
     //构建上传策略函数
